@@ -1,25 +1,26 @@
+import logging
+
 import user_repository
 
 user_queue = []
 
 
 def add_user(user_id: int):
-    user_queue.append(user_id)
+    if user_id not in user_queue:
+        user_queue.append(user_id)
 
 
 def listen():
     while len(user_queue) < 2:
         pass
 
-    matched_pairs = []
-    for i, user_id_1 in enumerate(user_queue):
-        max_score, max_user = None, None
-        for _, user_id_2 in enumerate(user_queue[:i + 1]):
-            user1, user2 = map(user_repository.get_user, (user_id_1, user_id_2))
-            if max_score is None or max_score < user1.match_score(user2):
-                max_score, max_user = user1.match_score(user2), user2
-
-
-
-
-
+    for i in range(len(user_queue) - 1):
+        user_id_1 = user_queue[i]
+        max_user_id = max(
+            user_queue[i + 1:],
+            key=lambda user_id_2: user_repository.get_user(user_id_1).match_score(
+                user_repository.get_user(user_id_2)
+            )
+        )
+        user_repository.update_interlocutor(user_id_1, max_user_id)
+        user_repository.update_interlocutor(max_user_id, user_id_1)

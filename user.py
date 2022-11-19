@@ -13,6 +13,7 @@ class User:
         self.country_to = None
         self.job = None
         self.problems = None
+        self.interlocutor = None
 
     def match_score(self, other: "User") -> int:
         problem_matches = set(self.problems).intersection(set(other.problems))

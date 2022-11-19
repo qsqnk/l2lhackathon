@@ -5,6 +5,10 @@ from user import User
 user_repository: Dict[int, User] = {}
 
 
+def get_all():
+    return {k: str(v) for k, v in user_repository.items()}
+
+
 def create_user(user_id: int) -> None:
     user_repository[user_id] = User()
 
@@ -23,6 +27,10 @@ def update_job(user_id: int, job: str) -> None:
 
 def update_problems(user_id: int, problems: List[int]) -> None:
     user_repository[user_id].problems = problems
+
+
+def update_interlocutor(user_id: int, interlocutor: int) -> None:
+    user_repository[user_id].interlocutor = interlocutor
 
 
 def get_user(user_id: int) -> Optional[User]:

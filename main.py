@@ -44,7 +44,7 @@ def main() -> None:
                 MessageHandler(filters.Text(["Find interlocutor"]), add_to_queue),
             ],
             CHATTING: [
-
+                MessageHandler(filters.ALL, chatting_message)
             ]
         },
         per_chat=False,

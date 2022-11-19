@@ -1,3 +1,5 @@
+import logging
+
 from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ContextTypes
 
@@ -5,6 +7,7 @@ import user_repository
 import user_queue
 from bot_states import *
 from helpers import user_id_text_from_update
+
 
 # from start state
 async def suggest_fill_information(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -80,6 +83,24 @@ async def add_to_queue(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     await update.message.reply_text(
         "You have been added to queue! Please wait for your interlocutor 🕔",
+    )
+
+    return CHATTING
+
+
+async def chatting_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+
+    user = user_repository.get_user(user_id)
+    if not user.interlocutor:
+        await update.message.reply_text(
+            "The interlocutor has not been found yet. Please wait 🕔",
+        )
+        return CHATTING
+
+    await context.bot.send_message(
+        user.interlocutor,
+        text,
     )
 
     return CHATTING
