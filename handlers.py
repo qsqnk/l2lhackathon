@@ -114,7 +114,9 @@ async def stop_chatting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         user_repository.update_interlocutor(id, None)
         await context.bot.send_message(
             id,
-            "Chat terminated" if id == user_id else "Your interlocutor terminated chat"
+            "Chat terminated" if id == user_id else "Your interlocutor terminated chat",
+            reply_markup=ReplyKeyboardMarkup([["Find interlocutor"]],
+                                             one_time_keyboard=True),
         )
 
     return CHATTING
@@ -165,7 +167,9 @@ async def agree_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await context.bot.send_message(
             id,
             f"First interlocutor: @{user_repository.get_user(user_id).username}\n" +
-            f"Second interlocutor: @{user_repository.get_user(interlocutor).username}\n"
+            f"Second interlocutor: @{user_repository.get_user(interlocutor).username}\n",
+            reply_markup=ReplyKeyboardMarkup([["Stop chatting", "Next interlocutor", "Exchange contacts"]],
+                                             one_time_keyboard=True),
         )
 
     return CHATTING
@@ -178,6 +182,8 @@ async def disagree_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await context.bot.send_message(
         interlocutor,
-        "Your interlocutor disagreed contact exchange"
+        "Your interlocutor disagreed contact exchange",
+        reply_markup=ReplyKeyboardMarkup([["Stop chatting", "Next interlocutor", "Exchange contacts"]],
+                                         one_time_keyboard=True),
     )
     return CHATTING

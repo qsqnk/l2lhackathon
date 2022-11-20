@@ -1,4 +1,3 @@
-import logging
 import threading
 import time
 
@@ -14,7 +13,7 @@ def add_user(user_id: int):
 
 
 def add_delayed(user_id: int) -> None:
-    time.sleep(15)
+    time.sleep(5)
     if user_id not in user_queue:
         user_queue.append(user_id)
 
