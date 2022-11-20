@@ -83,6 +83,7 @@ async def add_to_queue(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     await update.message.reply_text(
         "You have been added to queue! Please wait for your interlocutor 🕔",
+        reply_markup=ReplyKeyboardMarkup([["Stop searching"]], one_time_keyboard=True),
     )
 
     return CHATTING
@@ -187,3 +188,13 @@ async def disagree_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                                          one_time_keyboard=True),
     )
     return CHATTING
+
+
+async def stop_searching(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+    user_queue.remove_user(user_id)
+
+    await update.message.reply_text(
+        "You have been removed from queue",
+        reply_markup=ReplyKeyboardMarkup([["Find interlocutor"]], one_time_keyboard=True),
+    )

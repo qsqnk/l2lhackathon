@@ -49,9 +49,11 @@ def main() -> None:
                 MessageHandler(filters.Text(["Exchange contacts"]), exchange_contacts),
                 MessageHandler(filters.Text(["Agree exchange"]), agree_exchange),
                 MessageHandler(filters.Text(["Disagree exchange"]), disagree_exchange),
+                MessageHandler(filters.Text(["Stop searching"]), stop_searching),
                 MessageHandler(
                     filters.ALL & ~filters.Text(
-                        ["Find interlocutor",
+                        ["Stop searching",
+                         "Find interlocutor",
                          "Stop chatting",
                          "Next interlocutor",
                          "Exchange contacts",

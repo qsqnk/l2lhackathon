@@ -5,6 +5,7 @@ from telegram import ReplyKeyboardMarkup
 
 import user_repository
 
+temp = []
 user_queue = []
 
 
@@ -13,16 +14,21 @@ def add_user(user_id: int):
 
 
 def add_delayed(user_id: int) -> None:
+    temp.append(user_id)
     time.sleep(5)
-    if user_id not in user_queue:
+    if user_id not in user_queue and user_id in temp:
         user_queue.append(user_id)
+
+
+def remove_user(user_id: int) -> None:
+    temp.remove(user_id)
 
 
 async def listen():
     from bot import bot
     while True:
         if len(user_queue) < 2:
-            time.sleep(1)
+            time.sleep(5)
 
         passed = set()
 
