@@ -12,7 +12,7 @@ from helpers import user_id_text_from_update
 # from start state
 async def suggest_fill_information(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id, text = user_id_text_from_update(update)
-    user_repository.create_user(user_id)
+    user_repository.create_user(user_id, update.message.from_user.username)
     await update.message.reply_text(
         "Welcome to Migrate2gether chat-roulette ✈️!\n\n" +
         "Here you can talk to people that had to leave their home just like you. " +
@@ -71,10 +71,10 @@ async def save_problems(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     await context.bot.send_message(
         user_id,
-        f"Thank you! Information filled: {str(user_repository.get_user(user_id))}. Now you can find an interlocutor with similar data",
+        f"Thank you! Information filled. Now you can find an interlocutor with similar data",
         reply_markup=ReplyKeyboardMarkup([["Find interlocutor"]], one_time_keyboard=True),
     )
-    return INFO_CHOSEN
+    return CHATTING
 
 
 async def add_to_queue(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -103,4 +103,81 @@ async def chatting_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         text,
     )
 
+    return CHATTING
+
+
+async def stop_chatting(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+    user = user_repository.get_user(user_id)
+    interlocutor = user.interlocutor
+    for id in (user_id, interlocutor):
+        user_repository.update_interlocutor(id, None)
+        await context.bot.send_message(
+            id,
+            "Chat terminated" if id == user_id else "Your interlocutor terminated chat"
+        )
+
+    return CHATTING
+
+
+async def next_interlocutor(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+    user = user_repository.get_user(user_id)
+    interlocutor = user.interlocutor
+    user_repository.update_interlocutor(user_id, None)
+    user_repository.update_interlocutor(interlocutor, None)
+    await context.bot.send_message(
+        interlocutor,
+        "Your interlocutor terminated chat",
+        reply_markup=ReplyKeyboardMarkup([["Find interlocutor"]], one_time_keyboard=True),
+    )
+    await update.message.reply_text(
+        "Looking for next interlocutor... 🕔",
+    )
+    user_queue.add_user(user_id)
+    return CHATTING
+
+
+async def exchange_contacts(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+    user = user_repository.get_user(user_id)
+    interlocutor = user.interlocutor
+
+    await update.message.reply_text(
+        "Contact exchanging request has been sent",
+    )
+
+    await context.bot.send_message(
+        interlocutor,
+        "Your interlocutor want to exchange contacts",
+        reply_markup=ReplyKeyboardMarkup([["Agree exchange", "Disagre exchange"]], one_time_keyboard=True),
+    )
+
+    return CHATTING
+
+
+async def agree_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+    user = user_repository.get_user(user_id)
+    interlocutor = user.interlocutor
+
+    for id in (user_id, interlocutor):
+        await context.bot.send_message(
+            id,
+            f"First interlocutor: @{user_repository.get_user(user_id).username}\n" +
+            f"Second interlocutor: @{user_repository.get_user(interlocutor).username}\n"
+        )
+
+    return CHATTING
+
+
+async def disagree_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user_id, text = user_id_text_from_update(update)
+    user = user_repository.get_user(user_id)
+    interlocutor = user.interlocutor
+
+    await context.bot.send_message(
+        interlocutor,
+        "Your interlocutor disagreed contact exchange"
+    )
     return CHATTING

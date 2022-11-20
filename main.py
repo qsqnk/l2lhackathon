@@ -1,14 +1,17 @@
-import logging
+import asyncio
 import threading
 
+import telegram
 from telegram.ext import (
     Application,
     CommandHandler,
     ConversationHandler,
     MessageHandler,
     PollAnswerHandler,
-    filters,
+    filters, BaseHandler,
 )
+
+from config import TOKEN
 from handlers import *
 from bot_states import *
 
@@ -19,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    TOKEN = "5825509581:AAFV8VUD8lEyBKvaoqBKZX_5dGLiqczpJMc"
     application = Application.builder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
@@ -40,11 +42,23 @@ def main() -> None:
             WAITING_FOR_PROBLEMS: [
                 PollAnswerHandler(save_problems),
             ],
-            INFO_CHOSEN: [
-                MessageHandler(filters.Text(["Find interlocutor"]), add_to_queue),
-            ],
             CHATTING: [
-                MessageHandler(filters.ALL, chatting_message)
+                MessageHandler(filters.Text(["Find interlocutor"]), add_to_queue),
+                MessageHandler(filters.Text(["Stop chatting"]), stop_chatting),
+                MessageHandler(filters.Text(["Next interlocutor"]), next_interlocutor),
+                MessageHandler(filters.Text(["Exchange contacts"]), exchange_contacts),
+                MessageHandler(filters.Text(["Agree exchange"]), agree_exchange),
+                MessageHandler(filters.Text(["Disagree exchange"]), disagree_exchange),
+                MessageHandler(
+                    filters.ALL & ~filters.Text(
+                        ["Find interlocutor",
+                         "Stop chatting",
+                         "Next interlocutor",
+                         "Exchange contacts",
+                         "Agree exchange",
+                         "Disagree exchange"]
+                    ), chatting_message
+                )
             ]
         },
         per_chat=False,
@@ -52,7 +66,7 @@ def main() -> None:
     )
 
     application.add_handler(conv_handler)
-    threading.Thread(target=user_queue.listen).start()
+    threading.Thread(target=lambda: asyncio.run(user_queue.listen())).start()
     application.run_polling()
 
 

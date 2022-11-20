@@ -9,8 +9,8 @@ def get_all():
     return {k: str(v) for k, v in user_repository.items()}
 
 
-def create_user(user_id: int) -> None:
-    user_repository[user_id] = User()
+def create_user(user_id: int, username: str) -> None:
+    user_repository[user_id] = User(username)
 
 
 def update_country_from(user_id: int, country_from: str) -> None:

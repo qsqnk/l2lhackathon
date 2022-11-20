@@ -8,7 +8,8 @@ PROBLEM_MUL = 2
 
 class User:
 
-    def __init__(self):
+    def __init__(self, username: str):
+        self.username = username
         self.country_from = None
         self.country_to = None
         self.job = None
